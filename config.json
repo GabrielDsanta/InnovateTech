@@ -1,0 +1,6 @@
+{
+  "dev-host": "https://randomuser.me/api/",
+  "test-host": "https://randomuser.me/api/",
+  "staging-host": "https://randomuser.me/api/",
+  "environment": "development"
+}
