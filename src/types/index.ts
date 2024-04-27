@@ -1,19 +1,13 @@
 import * as yup from "yup";
 
 export interface FilterObject {
-  biggestPrice: boolean;
-  byDistance: boolean;
-  lowestPrice: boolean;
-  mostRecent: boolean;
-  thirtyDaysAgo: boolean;
+  female: boolean;
+  male: boolean;
 }
 
 export const filterValidation = yup.object().shape({
-  byDistance: yup.boolean(),
-  biggestPrice: yup.boolean(),
-  lowestPrice: yup.boolean(),
-  mostRecent: yup.boolean(),
-  thirtyDaysAgo: yup.boolean(),
+  female: yup.boolean(),
+  male: yup.boolean(),
 });
 
 export interface Student {
