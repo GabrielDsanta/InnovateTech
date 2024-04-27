@@ -1,182 +1,100 @@
-import React, { FC, FormEvent, useRef, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 
-import { SearchBar } from "components/SearchBar";
-import {
-  FlatList,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { FlatList, Image, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Formik, FormikValues } from "formik";
 import { Modalize } from "react-native-modalize";
-import { filterTrueValues } from "@utils/filterTrueValues";
 import { useStudent } from "hooks/useStudent";
-import { Student, filterValidation } from "../../../types";
-import { StudentCard } from "./components/StudentCard";
-
-import colors from "styles/colors";
-import fonts from "styles/fonts";
+import { Student } from "../../../types";
+import {
+  FilterModalize,
+  StudentCard,
+  ListEmptyComponent,
+  ListFooterComponent,
+} from "./components";
+import { SearchBar } from "components/SearchBar";
+import { StudentDetailsModal } from "./components/StudentDetailsModal";
 
 export const Home: FC = () => {
-  const { getStudents } = useStudent();
-  const { data } = getStudents;
+  const [page, setPage] = useState(1);
 
-  const [currentFiltersActivated, setCurrentFilterActivated] =
-    useState<Object | null>(null);
+  const { getStudents } = useStudent(String(page));
+  const { data, isLoading } = getStudents;
+
   const [filterTextValue, setFilterTextValue] = useState("");
-  const [filteredList, setFilteresList] = useState(null);
-  const [generalFilterValue, setGeneralFilterValue] = useState<
-    string | boolean
-  >(false);
+  const [filteredList, setFilteresList] = useState<Student[] | null>(null);
+  const [modalStudent, setModalStudent] = useState<Student | null>(null);
 
   const modalizeRef = useRef<Modalize>(null);
-  const flatListRef = useRef<FlatList | null>(null);
+  const flatListRef = useRef<FlatList>(null);
+
+  const handleEndReached = () => {
+    if (!data) {
+      return;
+    }
+    setPage((prevPage) => prevPage + 1);
+  };
+
+  const scrollToTop = () => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToOffset({ offset: 0, animated: true });
+    }
+  };
+
+  useEffect(() => {
+    const filteredStudents = data?.data.results.filter((item: Student) => {
+      return item.name.first
+        .toLocaleLowerCase()
+        .includes(filterTextValue.toLocaleLowerCase());
+    });
+
+    setFilteresList(filteredStudents);
+  }, [filterTextValue]);
+
+  useEffect(() => {
+    getStudents.refetch();
+    scrollToTop();
+  }, [page]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        style={styles.containerScrollView}
-      >
-        <View style={styles.containerContent}>
-          <Image
-            style={styles.logoImageStyles}
-            source={require("@assets/InnovateTechLogo.jpeg")}
-          />
+      <View style={styles.containerContent}>
+        <Image
+          style={styles.logoImageStyles}
+          source={require("@assets/InnovateTechLogo.jpeg")}
+        />
 
-          <SearchBar
-            setFilterTextValue={setFilterTextValue}
-            filterTextValue={filterTextValue}
-            onPressFilterButton={() => {
-              setFilteresList(null);
-              modalizeRef.current?.open();
-            }}
-          />
+        <SearchBar
+          setFilterTextValue={setFilterTextValue}
+          filterTextValue={filterTextValue}
+          onPressFilterButton={() => {
+            setFilteresList(null);
+            modalizeRef.current?.open();
+          }}
+        />
 
-          <View style={{ paddingBottom: 100 }}>
-            {data?.data?.results?.map((item: Student, index: number) => {
-              return <StudentCard key={item.id.value + index} student={item} />;
-            })}
-          </View>
+        <View style={styles.containerStudentListStyles}>
+          <FlatList
+            ref={flatListRef}
+            style={{ height: "70%" }}
+            ListEmptyComponent={<ListEmptyComponent />}
+            showsVerticalScrollIndicator={false}
+            keyExtractor={(item, index) => item.id.value + index}
+            renderItem={({ item }) => (
+              <StudentCard
+                onPress={() => setModalStudent(item)}
+                student={item}
+              />
+            )}
+            data={filteredList ? filteredList : data?.data?.results}
+            refreshing={isLoading}
+            onEndReached={handleEndReached}
+            ListFooterComponent={<ListFooterComponent />}
+          />
         </View>
-      </ScrollView>
+      </View>
 
-      <Modalize
-        modalHeight={400}
-        closeOnOverlayTap
-        withHandle={false}
-        scrollViewProps={{ showsVerticalScrollIndicator: false }}
-        ref={modalizeRef}
-        modalStyle={styles.containerModalize}
-      >
-        <Formik
-          validationSchema={filterValidation}
-          initialValues={{
-            byDistance: false,
-            biggestPrice: false,
-            lowestPrice: false,
-            mostRecent: false,
-            thirtyDaysAgo: false,
-          }}
-          onSubmit={(values) => {
-            const filteredValues = filterTrueValues(values);
-            setCurrentFilterActivated(filteredValues);
-            modalizeRef.current?.close();
-          }}
-        >
-          {({
-            handleSubmit,
-            setFieldValue,
-            values,
-          }: {
-            values: FormikValues;
-            handleSubmit: (event: FormEvent<HTMLFormElement>) => void;
-            setFieldValue: (
-              field: string,
-              value: any,
-              shouldValidate?: boolean
-            ) => void;
-          }) => {
-            return (
-              <View style={{ paddingBottom: 165 }}>
-                <View
-                  style={[
-                    styles.containerModalizeItem,
-                    {
-                      justifyContent: "space-between",
-                      borderTopWidth: 0,
-                      alignItems: "center",
-                      flexDirection: "row",
-                      marginTop: 15,
-                      paddingBottom: 10,
-                      paddingHorizontal: 20,
-                    },
-                  ]}
-                >
-                  <View style={{ width: 75 }}></View>
-                  <Text
-                    style={[
-                      styles.boldText,
-                      { color: "#404040", fontSize: 16 },
-                    ]}
-                  >
-                    Filtro
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => handleSubmit}
-                    style={{
-                      width: 70,
-                      backgroundColor: colors.primary,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      height: 25,
-                      borderRadius: 1000,
-                    }}
-                  >
-                    <Text style={[styles.boldText]}>Salvar</Text>
-                  </TouchableOpacity>
-                </View>
-
-                {FilterFields.map((item) => (
-                  <TouchableOpacity
-                    onPress={() => {
-                      setFieldValue(item.id, !values[item.id]);
-                      setGeneralFilterValue(item.id);
-                    }}
-                    style={[
-                      styles.containerModalizeItem,
-                      { height: 50, borderTopWidth: 0 },
-                      item.id === "thirtyDaysAgo" && { borderBottomWidth: 0 },
-                    ]}
-                    key={item.id}
-                  >
-                    <Text
-                      style={[
-                        styles.regularText,
-                        { color: colors.primary },
-                        generalFilterValue === item.id && {
-                          ...fonts.boldFont,
-                          backgroundColor: colors.primary,
-                          color: "white",
-                          borderRadius: 10000,
-                          paddingHorizontal: 15,
-                          paddingVertical: 5,
-                        },
-                      ]}
-                    >
-                      {item.title}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            );
-          }}
-        </Formik>
-      </Modalize>
+      <FilterModalize modalizeRef={modalizeRef} />
+      <StudentDetailsModal setModalStudent={setModalStudent} modalStudent={modalStudent} />
     </SafeAreaView>
   );
 };
@@ -186,16 +104,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
   },
-  containerScrollView: {
-    flex: 1,
-  },
-  regularText: {
-    ...fonts.regularFont,
-  },
   containerContent: {
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 20,
   },
   logoImageStyles: {
     width: 150,
@@ -203,44 +116,9 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     alignSelf: "center",
   },
-  containerModalize: {
-    backgroundColor: "white",
-    alignItems: "center",
-    paddingHorizontal: 10,
-  },
-  containerModalizeItem: {
-    height: 35,
+  containerStudentListStyles: {
+    paddingBottom: 100,
     width: "100%",
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  boldText: {
-    ...fonts.boldFont,
+    marginTop: 25,
   },
 });
-
-const FilterFields = [
-  {
-    id: "byDistance",
-    title: "Por distância",
-  },
-  {
-    id: "biggestPrice",
-    title: "Maior preço",
-  },
-  {
-    id: "lowestPrice",
-    title: "Menor preço",
-  },
-  {
-    id: "mostRecent",
-    title: "Mais recentes",
-  },
-  {
-    id: "thirtyDaysAgo",
-    title: "Anunciados a mais de 30 dias",
-  },
-];

@@ -42,6 +42,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 10,
+    width: '100%'
   },
   containerInput: {
     flexDirection: "row",
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
     borderColor: "#DBDBDB",
     borderRadius: 10000,
     paddingHorizontal: 20,
-    width: 300,
+    width: 320,
     height: 40,
     alignItems: "center",
   },

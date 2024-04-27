@@ -2,8 +2,8 @@ import host from "../utils/host";
 import axios from "axios";
 
 export class StudentService {
-  static async getStudents() {
-    const url = `${host()}/?page=2&results=20&seed=abc`;
+  static async getStudents(page: string) {
+    const url = `${host()}/?page=${page}&results=20&seed=abc`;
 
     try {
       const response = await (

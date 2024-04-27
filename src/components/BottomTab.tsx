@@ -1,7 +1,6 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC } from "react";
 
 import {
-  Keyboard,
   Platform,
   StyleSheet,
   TouchableOpacity,
@@ -15,8 +14,8 @@ import { AppTabsRoutesNavigationRoutesProps } from "screens/AppTabs";
 import colors from "../styles/colors";
 import fonts from "../styles/fonts";
 
-type IconName = "package" | "truck" | "calendar";
-type RouteNames = "Home";
+type IconName = "home";
+type RouteNames = "StudentList";
 
 const isAndroid = Platform.OS === "android";
 
@@ -33,7 +32,7 @@ export const BottomTab: FC<BottomTabBarProps> = ({ state }) => {
             onPress={() => navigation.navigate(route.name as RouteNames)}
           >
             <Feather
-              name={["package", "truck", "calendar"][index] as IconName}
+              name={["home"][index] as IconName}
               size={32}
               color={color}
             />

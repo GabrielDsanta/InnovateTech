@@ -4,7 +4,7 @@ import { BottomTabNavigationProp, createBottomTabNavigator } from "@react-naviga
 import { Host } from "react-native-portalize";
 import { BottomTab } from "components/BottomTab";
 import { Keyboard } from "react-native";
-import { StudentList } from "./StockRoutes";
+import { StudentList } from "./StudentList";
 
 type AppRoutesType = {
   StudentList: undefined;
