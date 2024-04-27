@@ -72,3 +72,11 @@ export interface Student {
     date: string;
   };
 }
+
+export interface User {
+  id: string;
+  name: string;
+  age: string;
+  surName: string;
+  email: string;
+}

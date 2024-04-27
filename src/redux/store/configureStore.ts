@@ -1,9 +1,8 @@
 import { combineReducers, legacy_createStore as createStore } from "redux";
-import { userReducer, outputReducer } from "@redux/reducers";
+import { userReducer } from "@redux/reducers";
 
 const rootReducer = combineReducers({
-  userReducer,
-  outputReducer
+  userReducer
 });
 
 const configureStore: any = () => {
