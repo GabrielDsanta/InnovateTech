@@ -19,7 +19,7 @@ export const Home: FC = () => {
   const [page, setPage] = useState(1);
   const [cachedData, setCachedData] = useState<Student[]>([]);
 
-  const { getStudents } = useStudent(String(page));
+  const { getStudents } = useStudent(String(page), cachedData.length > 0 && page === 1 ? true : false);
   const { data, isLoading } = getStudents;
 
   const [currentFiltersActivated, setCurrentFilterActivated] =
@@ -56,7 +56,7 @@ export const Home: FC = () => {
     if (page > 2) {
       return data?.data?.results;
     }
-    if (!filteredList && cachedData && page === 1) {
+    if (!filteredList && cachedData.length > 0 && page === 1) {
       return cachedData;
     }
 
@@ -64,7 +64,7 @@ export const Home: FC = () => {
       return filteredList;
     }
 
-    if (!filteredList && !cachedData && data?.data?.results) {
+    if (!filteredList && cachedData.length === 0 && data?.data?.results) {
       return data.data.results;
     }
   };
